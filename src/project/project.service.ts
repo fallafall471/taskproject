@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,23 +11,33 @@ export class ProjectService {
 private projectrepository:Repository<Project>){}
   
 async create(createProjectDto: CreateProjectDto):Promise<Project> {
-    const Project = await this.projectrepository.create(createProjectDto)
-    return this.projectrepository.save(Project)
+    const project =  this.projectrepository.create(createProjectDto)
+    return this.projectrepository.save(project)
   }
 
   async findAll() :Promise<Project[]>{
     return this.projectrepository.find()
   }
 
-  findOne(id: number):Promise<Project | null> {
-    return this.projectrepository.findOneBy({id});
+  async findOne(id: number):Promise<Project > {
+    const project = await this.projectrepository.findOneBy({id})
+    if (!project){
+      throw new NotFoundException(`Le projet avec l'identifiant ${id} est introuvable.`)
+    }
+    return project
   }
 
-  update(id: number, updateProjectDto: UpdateProjectDto) {
-    return `This action updates a #${id} project`;
+  async update(id: number, updateProjectDto: UpdateProjectDto) : Promise<Project> {
+    const project  = await this.findOne(id);
+    
+    Object.assign(project,updateProjectDto)
+
+    return this.projectrepository.save(project)
   }
 
   async remove(id: number):Promise<void> {
+    const resultat = await this.findOne(id)
+    
     await this.projectrepository.delete(id);
   }
 }
