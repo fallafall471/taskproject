@@ -2,33 +2,34 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Task } from './entities/task.entity';
+import { Status, Task } from './entities/task.entity';
 import { Repository } from 'typeorm';
 import { ProjectService } from '../project/project.service';
+import { UpdateTaskStatusDto } from './dto/status.dto';
 
 @Injectable()
 export class TasksService {
   constructor(@InjectRepository(Task)
-  private readonly TaskRepository:Repository<Task>,
+  private readonly taskrepository:Repository<Task>,
   private readonly projectservice:ProjectService){}
   
   async create(createTaskDto: CreateTaskDto):Promise<Task> {
     const project = await this.projectservice.findOne(createTaskDto.projectId) ;
-    const task=this.TaskRepository.create({
+    const task=this.taskrepository.create({
       Title:createTaskDto.Title,
       Description:createTaskDto.Descriprtion,
       status:createTaskDto.status,
       project:project
     })
-    return this.TaskRepository.save(task)
+    return this.taskrepository.save(task)
   }
 
   async findAll() : Promise<Task[]>{
-    return this.TaskRepository.find()
+    return this.taskrepository.find()
   }
 
   async findOne(id: number) :Promise<Task> {
-    const task = await this.TaskRepository.findOneBy({id})
+    const task = await this.taskrepository.findOneBy({id})
     if(!task){
       throw new NotFoundException(`La tache avec l'identifiant ${id} est introuvable.`)
     }
@@ -57,15 +58,19 @@ export class TasksService {
     task.Description = updateTaskDto.Descriprtion;
   }
 
-  return this.TaskRepository.save(task);
+  return this.taskrepository.save(task);
 }
 
   async remove(id: number) : Promise<void> {
+    await this.findOne(id)
+    
+    await this.taskrepository.delete(id)
+  }
+
+  async updateStatut (id:number,updatetaskstatutdto : UpdateTaskStatusDto):Promise<Task>{
     const task = await this.findOne(id)
-    if(!task){
-      throw new NotFoundException(`La tache avec l'identifiant ${id} est introuvable.`)
-    }
-    await this.TaskRepository.delete(id)
+    task.status = updatetaskstatutdto.status
+    return this.taskrepository.save(task)
   }
 }
 
