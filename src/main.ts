@@ -10,12 +10,23 @@ async function bootstrap() {
   .setTitle("Taskproject")
   .setDescription("Api de gestion de project")
   .setVersion("1.0")
+  .addBasicAuth( {
+      type: 'http',
+      scheme: 'bearer',
+      bearerFormat: 'JWT',
+      in: 'header',
+    },
+    'JWT-auth',)
   .build()
 
   const documentFactory = SwaggerModule.createDocument(app,config);
   SwaggerModule.setup('api/docs', app, documentFactory);
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }));
   await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();

@@ -6,12 +6,12 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 export class CreateTaskDto {
     @ApiProperty({description:"titre de la tache",example:"installer les dependances"})  
     @IsString()
-    Title:string 
+    title:string 
 
     @ApiPropertyOptional({description:"description de la tache",example:"installer typeorm"})
     @IsOptional()
     @IsString()
-    Descriprtion:string
+    description?:string
     @ApiPropertyOptional({description:"status de la tache ",example:"Todo"})
     @IsEnum(Status)
     @IsOptional()

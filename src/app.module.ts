@@ -7,6 +7,11 @@ import { ProjectModule } from './project/project.module';
 import { Project } from './project/entities/project.entity';
 import { TasksModule } from './tasks/tasks.module';
 import { Task } from './tasks/entities/task.entity';
+import { UserModule } from './user/user.module';
+import { User } from './user/entities/user.entity';
+import { AuthModule } from './auth/auth.module';
+import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 
 @Module({
@@ -23,7 +28,7 @@ TypeOrmModule.forRootAsync({
     username: configService.get('DATABASE_USERNAME'),
     password: configService.get('DATABASE_PASSWORD'),
     database: configService.get('DATABASE_NAME'),
-    entities: [Project,Task],
+    entities: [Project,Task,User],
     synchronize: true,
   }),
   inject: [ConfigService],
@@ -31,9 +36,16 @@ TypeOrmModule.forRootAsync({
 
 ProjectModule,
 
-TasksModule
+TasksModule,
+
+UserModule,
+
+AuthModule
 ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,{
+    provide: APP_GUARD,
+    useClass: JwtAuthGuard,
+  },],
 })
 export class AppModule {}

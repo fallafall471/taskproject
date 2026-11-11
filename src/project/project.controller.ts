@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import { ApiOperation, ApiTags,ApiCreatedResponse, ApiResponse, ApiBadRequestResponse, ApiOkResponse, ApiNotFoundResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiTags,ApiCreatedResponse, ApiResponse, ApiBadRequestResponse, ApiOkResponse, ApiNotFoundResponse, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth('JWT-auth')
 @ApiTags("project")
 @Controller('project')
 export class ProjectController {
@@ -28,22 +29,22 @@ export class ProjectController {
   @ApiOperation({summary:"recupere un poject dans la base de donnée"})
   @Get(':id')
   @ApiOkResponse({description:"project trouve avec succes"})
-  findOne(@Param('id') id: string) {
-    return this.projectService.findOne(+id);
+  findOne(@Param('id',ParseIntPipe) id: number) {
+    return this.projectService.findOne(id);
   }
 
   @ApiOperation({summary:"modifier un porject dans la base de donnée"})
   @Patch(':id')
   @ApiOkResponse({description:"rproject modifier avec succes"})
   @ApiNotFoundResponse({description:"ce project existe pas"})
-  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectService.update(+id, updateProjectDto);
+  update(@Param('id',ParseIntPipe) id: number, @Body() updateProjectDto: UpdateProjectDto) {
+    return this.projectService.update(id, updateProjectDto);
   }
 
   @ApiOperation({summary:"suprime un project dans la base de donnée"})
   @Delete(':id')
   @ApiOkResponse({description:"project suprime avec succes"})
-  remove(@Param('id') id: string) {
-    return this.projectService.remove(+id);
+  remove(@Param('id',ParseIntPipe) id: number) {
+    return this.projectService.remove(id);
   }
 }

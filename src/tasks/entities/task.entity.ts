@@ -12,13 +12,13 @@ export class Task {
     @PrimaryGeneratedColumn()
     id:number
     @Column()
-    Title:string
+    title:string
     @Column()
-    Description?:string
+    description?:string
     @Column({type:"enum",enum:Status,default:Status.TODO})
     status:Status
     @ManyToOne(()=>Project,(project)=>project.tasks)
     project:Project
-    @CreateDateColumn({type:"datetime"})
+    @CreateDateColumn()
     createAt:Date
 }

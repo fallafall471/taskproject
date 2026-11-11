@@ -10,26 +10,31 @@ import { UpdateTaskStatusDto } from './dto/status.dto';
 @Injectable()
 export class TasksService {
   constructor(@InjectRepository(Task)
-  private readonly taskrepository:Repository<Task>,
-  private readonly projectservice:ProjectService){}
+  private readonly taskRepository:Repository<Task>,
+  private readonly projectService:ProjectService){}
   
   async create(createTaskDto: CreateTaskDto):Promise<Task> {
-    const project = await this.projectservice.findOne(createTaskDto.projectId) ;
-    const task=this.taskrepository.create({
-      Title:createTaskDto.Title,
-      Description:createTaskDto.Descriprtion,
+    const project = await this.projectService.findOne(createTaskDto.projectId) ;
+    const task=this.taskRepository.create({
+      title:createTaskDto.title,
+      description:createTaskDto.description,
       status:createTaskDto.status,
       project:project
     })
-    return this.taskrepository.save(task)
+    return this.taskRepository.save(task)
   }
 
   async findAll() : Promise<Task[]>{
-    return this.taskrepository.find()
+    return this.taskRepository.find({
+      relations:{project:true}
+    })
   }
 
   async findOne(id: number) :Promise<Task> {
-    const task = await this.taskrepository.findOneBy({id})
+    const task = await this.taskRepository.findOne({
+      where:{id},
+      relations:{project:true}
+    })
     if(!task){
       throw new NotFoundException(`La tache avec l'identifiant ${id} est introuvable.`)
     }
@@ -43,34 +48,34 @@ export class TasksService {
   const task = await this.findOne(id);
 
   if (updateTaskDto.projectId !== undefined) {
-    const project = await this.projectservice.findOne(
+    const project = await this.projectService.findOne(
       updateTaskDto.projectId,
     );
 
     task.project = project;
   }
 
-  if (updateTaskDto.Title !== undefined) {
-    task.Title = updateTaskDto.Title;
+  if (updateTaskDto.title !== undefined) {
+    task.title = updateTaskDto.title;
   }
 
-  if (updateTaskDto.Descriprtion !== undefined) {
-    task.Description = updateTaskDto.Descriprtion;
+  if (updateTaskDto.description !== undefined) {
+    task.description = updateTaskDto.description;
   }
 
-  return this.taskrepository.save(task);
+  return this.taskRepository.save(task);
 }
 
   async remove(id: number) : Promise<void> {
     await this.findOne(id)
     
-    await this.taskrepository.delete(id)
+    await this.taskRepository.delete(id)
   }
 
-  async updateStatut (id:number,updatetaskstatutdto : UpdateTaskStatusDto):Promise<Task>{
+  async updateStatut (id:number,updateTaskStatutDto : UpdateTaskStatusDto):Promise<Task>{
     const task = await this.findOne(id)
-    task.status = updatetaskstatutdto.status
-    return this.taskrepository.save(task)
+    task.status = updateTaskStatutDto.status
+    return this.taskRepository.save(task)
   }
 }
 
